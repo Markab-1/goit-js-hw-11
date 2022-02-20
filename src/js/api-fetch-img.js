@@ -55,6 +55,7 @@ async function processMoreImages() {
 
 function resetPage() {
     pageNumber = 1;
+    currentImgAmount = 0;
 }
 
 async function getImages(imageLink) {
