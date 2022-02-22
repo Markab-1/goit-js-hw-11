@@ -1,9 +1,17 @@
 import SimpleLightbox from 'simplelightbox';
-import { makeImgLink, processImages, processMoreImages } from './api-fetch-img'
+import Notiflix from "notiflix";
+import { makeImgLink, processImages, processMoreImages, currentImgAmount } from './api-fetch-img'
 import { galleryMarkup } from './markup'
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
 var lightbox = new SimpleLightbox('.gallery a');
+
+const notiflixOptions = {
+    timeout: 5000,
+    clickToClose: true,
+    fontSize: '20px',
+    width: '400px',
+};
 
 const refs = {
     searchForm: document.querySelector('#search-form'),
@@ -31,6 +39,13 @@ function onSearch(e) {
 }
 
 function onResolve(data) {
+    if (data.total === 0) {
+        Notiflix.Notify.failure('Sorry, there are no images matching your search query. Please try again.', notiflixOptions,);
+        return;
+    }
+    if (data.total > 0) {
+        Notiflix.Notify.info(`Hooray! We found ${data.totalHits} images.`, notiflixOptions,);
+    }
     insertMarkup(data);
     lightbox.refresh();
     scroll();
@@ -46,7 +61,10 @@ function onLoadMore() {
             lightbox.refresh();
             scroll();
         })
-    .catch(error => offVisible(refs.loadBtn));
+        .catch(error => {
+            offVisible(refs.loadBtn);
+            Notiflix.Notify.failure('We\'re sorry, but you\'ve reached the end of search results.', notiflixOptions,);
+        });
  }
 
 function cleanData(data) {

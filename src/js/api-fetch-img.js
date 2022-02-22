@@ -1,5 +1,4 @@
 import axios from "axios";
-import Notiflix from "notiflix";
 export { makeImgLink, processImages, processMoreImages };
     
 const API_KEY = "25715190-c3c4d5478cb2124fb43ef72a8";
@@ -8,13 +7,6 @@ const BASE_URL = "https://pixabay.com/api/";
 let imageLink = "";
 let pageNumber = 1;
 let currentImgAmount = 0;
-
-const notiflixOptions = {
-    timeout: 5000,
-    clickToClose: true,
-    fontSize: '20px',
-    width: '400px',
-};
 
 function makeImgLink(link) {
     imageLink = BASE_URL + "?key=" + API_KEY + "&q=" + link + "&image_type=photo&orientation=horizontal&safesearch=true&per_page=40&page=";
@@ -26,14 +18,8 @@ async function processImages() {
     const currentImageLink = imageLink + `${pageNumber}`;
     const imgData = await getImages(currentImageLink);
 
-            if (imgData.total > 0) {
-                Notiflix.Notify.info(`Hooray! We found ${imgData.totalHits} images.`, notiflixOptions,);
-                console.log("length", imgData.hits.length);
-                currentImgAmount += imgData.hits.length;
-                return imgData ;
-            }
-            if (imgData.total === 0) { Notiflix.Notify.failure('Sorry, there are no images matching your search query. Please try again.', notiflixOptions,); }
-        
+    currentImgAmount += imgData.hits.length;
+    return imgData ;   
 }
 
 async function processMoreImages() {
@@ -41,15 +27,11 @@ async function processMoreImages() {
         const currentImageLink = imageLink + `${pageNumber}`;
 
         const imgData = await getImages(currentImageLink);
-            console.log(imgData.hits.length, currentImgAmount);
         if (currentImgAmount < imgData.total) {
             currentImgAmount += imgData.hits.length;
             return imgData;
             }
-        if (currentImgAmount >= imgData.total) {
-            Notiflix.Notify.failure('We\'re sorry, but you\'ve reached the end of search results.', notiflixOptions,);
-            return (new Error);
-        }
+        if (currentImgAmount >= imgData.total) { return (new Error); }
     }
 }
 
